@@ -4,7 +4,9 @@ import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
 import android.os.IBinder
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class NorrisBackGroundWorker : Service() {
 
     //TODO: add to work manager to re-start service
