@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Chuck Norris Jokes</string>
     <string name="this_app_sends_you_chuck_norris_jokes_when_you_are_most_bored">This app sends you Chuck Norris jokes when you are most bored.</string>
+    <string name="channel_name">channel_name</string>
+    <string name="channel_description">channel_description</string>
+    <string name="notificationId">CHANNEL_ID</string>
+
 </resources>

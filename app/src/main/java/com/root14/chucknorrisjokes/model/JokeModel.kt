@@ -8,5 +8,4 @@ data class JokeModel(
     @SerializedName("id") var id: String? = null,
     @SerializedName("url") var url: String? = null,
     @SerializedName("value") var value: String? = null,
-    var done: Boolean? = null
 )
