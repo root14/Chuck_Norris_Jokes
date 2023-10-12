@@ -6,13 +6,14 @@ import androidx.lifecycle.MutableLiveData
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.model.JokeModel
+import com.root14.chucknorrisjokes.utils.NetworkStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ServiceController {
+    //TODO: turn to dynamic object and provide&inject to classes
     companion object {
-
 
         private val _joke = MutableLiveData<JokeModel>()
         val joke: LiveData<JokeModel> = _joke
@@ -36,8 +37,6 @@ class ServiceController {
                 }
 
             }
-
-
         }
 
         private val _categorysCheck = MutableLiveData<Boolean>()

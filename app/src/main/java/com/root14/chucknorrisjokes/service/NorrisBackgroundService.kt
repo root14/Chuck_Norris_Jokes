@@ -9,17 +9,25 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.getSystemService
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
 import com.root14.chucknorrisjokes.MainActivity
 import com.root14.chucknorrisjokes.R
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
+import com.root14.chucknorrisjokes.utils.NotificationParams
+import com.root14.chucknorrisjokes.utils.PopNotification
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -34,6 +42,7 @@ class NorrisBackgroundService : Service() {
     @Inject
     lateinit var roomRepository: RoomRepository
 
+
     override fun onBind(intent: Intent): IBinder {
         TODO("Return the communication channel to the service.")
     }
@@ -45,6 +54,7 @@ class NorrisBackgroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+
         //create notification channel
         createNotificationChannel()
         //fetch categories
@@ -53,18 +63,19 @@ class NorrisBackgroundService : Service() {
         )
         //fetch jokes
         ServiceController.fetchJokesByCategory(
-            retrofitRepository = retrofitRepository,
-            roomRepository = roomRepository
+            retrofitRepository = retrofitRepository, roomRepository = roomRepository
         )
+        //TODO: handle no internet connection -> causes exception
 
 
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+        /*WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "unique_worker_name", ExistingPeriodicWorkPolicy.KEEP, //KEEP or REPLACE
             JokeWorker.getPeriodicWorkRequest() //your work instance.
-        )
+        )*/
 
+        WorkManager.getInstance(this).enqueue(JokeWorker.getOneTimeRequest())
 
-//super.onStartCommand(intent, flags, startId)
+        //super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }
 
@@ -78,33 +89,6 @@ class NorrisBackgroundService : Service() {
 
     override fun startService(service: Intent?): ComponentName? {
         return super.startService(service)
-    }
-
-    private fun popNotification() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent: PendingIntent =
-            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-
-        val builder = NotificationCompat.Builder(this, "CHANNEL_ID")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("My notification")
-            .setContentText("Hello World!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            // Set the intent that fires when the user taps the notification.
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-
-        if (ActivityCompat.checkSelfPermission(
-                baseContext, Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            with(NotificationManagerCompat.from(this)) {
-                // notificationId is a unique int for each notification that you must define.
-                notify(R.string.notificationId, builder.build())
-            }
-        }
     }
 
     private fun createNotificationChannel() {

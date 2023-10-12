@@ -10,23 +10,33 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
+import com.root14.chucknorrisjokes.utils.NetworkStatus
+import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
 import java.util.concurrent.TimeUnit
 
-class JokeWorker(context: Context, parameters: WorkerParameters) :
-    CoroutineWorker(context, parameters) {
+
+class JokeWorker(
+    context: Context,
+    parameters: WorkerParameters,
+
+    ) : CoroutineWorker(context, parameters) {
+
+    private val _context: Context = context
+
     override suspend fun doWork(): Result {
+        //internet connection -> provide random joke from api && check db for joke count and fill it!
+        //internet connection & bad request & api exceptions -> provide from db
+        //no internet connection -> provide from db
 
-        //there is gonna work if network connected, so we can provide random joke.
-        // with this way we not gonna waste joke in db
 
+        if (NetworkStatusChecker().checkConnection(_context) == NetworkStatus.CONNECTED) {
+            println("norris made a joke from api!")
+            return Result.success()
 
-        return try {
-            Log.d("worker", "in every 15 seconds")
-            Result.success()
-        } catch (e: Exception) {
-            Log.e("worker_exception", e.message.toString())
-            Result.failure()
+        } else if (NetworkStatusChecker().checkConnection(_context) == NetworkStatus.NOT_CONNECTED) {
+            return Result.failure()
         }
+        return Result.failure()
     }
 
     companion object {

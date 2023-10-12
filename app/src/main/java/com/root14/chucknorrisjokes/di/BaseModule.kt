@@ -1,6 +1,7 @@
 package com.root14.chucknorrisjokes.di
 
 import android.app.Application
+import android.content.Context
 import androidx.room.Room
 import com.root14.chucknorrisjokes.data.database.AppDatabase
 import com.root14.chucknorrisjokes.data.database.dao.CategoryDao
@@ -8,9 +9,11 @@ import com.root14.chucknorrisjokes.data.database.dao.JokeDao
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitService
+import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -26,26 +29,20 @@ object BaseModule {
 
     @Singleton
     @Provides
-    fun providesHttpLoggingInterceptor() = HttpLoggingInterceptor()
-        .apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
+    fun providesHttpLoggingInterceptor() = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
 
     @Singleton
     @Provides
     fun providesOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient =
-        OkHttpClient
-            .Builder()
-            .addInterceptor(httpLoggingInterceptor)
-            .build()
+        OkHttpClient.Builder().addInterceptor(httpLoggingInterceptor).build()
 
     @Singleton
     @Provides
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
-        .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl(BASE_URL)
-        .client(okHttpClient)
-        .build()
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
+        Retrofit.Builder().addConverterFactory(GsonConverterFactory.create()).baseUrl(BASE_URL)
+            .client(okHttpClient).build()
 
 
     @Singleton
@@ -61,8 +58,7 @@ object BaseModule {
     @Singleton
     fun provideAppDatabase(application: Application): AppDatabase {
         return Room.databaseBuilder(
-            application,
-            AppDatabase::class.java, "database-norris"
+            application, AppDatabase::class.java, "database-norris"
         ).build()
     }
 

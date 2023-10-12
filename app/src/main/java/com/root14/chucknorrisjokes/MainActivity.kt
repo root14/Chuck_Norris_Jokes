@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
 
-
         val serviceIntent = Intent(this, NorrisBackgroundService::class.java)
         startService(serviceIntent)
     }
