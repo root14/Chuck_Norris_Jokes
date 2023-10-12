@@ -3,6 +3,7 @@ package com.root14.chucknorrisjokes.service
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.root14.chucknorrisjokes.data.database.entity.JokeEntity
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.model.JokeModel
@@ -12,11 +13,79 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ServiceController {
-    //TODO: turn to dynamic object and provide&inject to classes
+
+
     companion object {
+        var _internetPermission = MutableLiveData<Boolean>()
+        var internetPermission: LiveData<Boolean> = _internetPermission
+
+        /**
+         * @param roomRepository
+         * @return joke count in room db
+         * @exception at any problem return = -1
+         */
+        fun getJokeCountInDb(roomRepository: RoomRepository): Int {
+            var count: Int = -1
+            CoroutineScope(Dispatchers.IO).launch {
+                count = roomRepository.getJokeCount()
+            }
+            return count
+        }
+
+
+        private val _jokeRandomJokeFromApi = MutableLiveData<JokeModel>()
+        val jokeRandomJokeFromApi: LiveData<JokeModel> = _jokeRandomJokeFromApi
+
+        /**
+         * @param retrofitRepository
+         * @return provide random joke from api
+         */
+        fun getRandomJokeFromApi(retrofitRepository: RetrofitRepository) {
+            CoroutineScope(Dispatchers.IO).launch {
+
+                val data = retrofitRepository.getRandomJoke()
+                if (data.isSuccessful) {
+                    _jokeRandomJokeFromApi.postValue(data.body())
+                } else {
+                    Log.e("random joke", "cannot provide random joke!")
+                }
+            }
+        }
+
+        /**
+         * @param roomRepository roomDB repo
+         * @return joke from db
+         */
+        private val _jokeFromDb = MutableLiveData<JokeModel>()
+        val jokeFromDb: LiveData<JokeModel> = _jokeFromDb
+        fun getJokeFromDb(roomRepository: RoomRepository) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val data = roomRepository.getJoke()
+                if (data != null) {
+                    _jokeFromDb.postValue(
+                        JokeModel(
+                            iconUrl = data.iconUrl,
+                            id = data.id,
+                            url = data.url,
+                            value = data.value,
+                        )
+                    )
+                } else {
+                    Log.e("joke from db", "cannot provide joke from db!")
+                }
+            }
+        }
+
 
         private val _joke = MutableLiveData<JokeModel>()
         val joke: LiveData<JokeModel> = _joke
+
+        /**
+         * @param roomRepository
+         * @param retrofitRepository
+         * @return this method try to automize process. be carefully when use it
+         * @return try to provide firstly from room db if any problem occurs return random joke from api
+         */
         fun getJoke(retrofitRepository: RetrofitRepository, roomRepository: RoomRepository) {
             CoroutineScope(Dispatchers.IO).launch {
                 val data = roomRepository.getJoke()
@@ -39,6 +108,7 @@ class ServiceController {
             }
         }
 
+        //initialise method
         private val _categorysCheck = MutableLiveData<Boolean>()
         val categorysCheck: LiveData<Boolean> = _categorysCheck
         fun initCategories(

@@ -8,6 +8,11 @@ import com.root14.chucknorrisjokes.model.JokeModel
 
 class RoomRepository(private val categoryDao: CategoryDao, private val jokeDao: JokeDao) {
 
+
+    suspend fun getJokeCount(): Int {
+        return jokeDao.getCount()
+    }
+
     suspend fun saveCategory(category: List<String>) {
 
         val categoryDb = categoryDao.getAll()

@@ -9,8 +9,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface JokeDao {
+
+    @Query("SELECT COUNT(*) count FROM JokeEntity")
+    fun getCount(): Int
+
     @Query("SELECT * FROM JokeEntity")
-    fun getAll():List<JokeEntity>
+    fun getAll(): List<JokeEntity>
 
     @Query("SELECT * FROM JokeEntity ORDER BY RANDOM() LIMIT 1")
     suspend fun getJoke(): JokeEntity
