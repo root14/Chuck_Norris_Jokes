@@ -42,12 +42,11 @@ class RoomRepository(private val categoryDao: CategoryDao, private val jokeDao: 
     suspend fun getJoke(): JokeEntity? {
         return try {
             val data = jokeDao.getJoke()
-            jokeDao.delete(data)
+            //jokeDao.delete(data)
             data
         } catch (exception: Exception) {
             null
         }
-
     }
 
     suspend fun getAllJokes(): List<JokeEntity> {

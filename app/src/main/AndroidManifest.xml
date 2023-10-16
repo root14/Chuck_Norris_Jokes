@@ -24,7 +24,10 @@
 
         <service
             android:name=".service.NorrisBackgroundService"
-            android:enabled="true" />
+            android:enabled="true"
+            android:exported="true"
+            android:stopWithTask="false"
+            />
 
         <activity
             android:name=".MainActivity"
