@@ -1,41 +1,26 @@
 package com.root14.chucknorrisjokes.service
 
-import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.ConnectivityManager
 import android.os.IBinder
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.getSystemService
+import android.widget.Toast
+import androidx.lifecycle.LifecycleService
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
-import com.root14.chucknorrisjokes.MainActivity
 import com.root14.chucknorrisjokes.R
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
-import com.root14.chucknorrisjokes.utils.NotificationParams
-import com.root14.chucknorrisjokes.utils.PopNotification
+import com.root14.chucknorrisjokes.utils.NetworkStatus
+import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class NorrisBackgroundService : Service() {
-
-    //TODO: add to work manager to re-start service
-
+class NorrisBackgroundService : LifecycleService() {
     @Inject
     lateinit var retrofitRepository: RetrofitRepository
 
@@ -44,50 +29,52 @@ class NorrisBackgroundService : Service() {
 
 
     override fun onBind(intent: Intent): IBinder {
+        super.onBind(intent)
         TODO("Return the communication channel to the service.")
     }
 
     override fun onCreate() {
         super.onCreate()
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
 
+        //inject room repository
+        ServiceController.injectRoomRepository(roomRepository)
 
         //create notification channel
         createNotificationChannel()
-        //fetch categories
-        ServiceController.initCategories(
-            retrofitRepository = retrofitRepository, roomRepository = roomRepository
-        )
-        //fetch jokes
-        ServiceController.fetchJokesByCategory(
-            retrofitRepository = retrofitRepository, roomRepository = roomRepository
-        )
-        //TODO: handle no internet connection -> causes exception
 
+        if (NetworkStatusChecker().checkConnection(this) == NetworkStatus.CONNECTED) {
+            //inject retrofit repository
+            ServiceController.injectRetrofitRepository(retrofitRepository)
 
-        /*WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "unique_worker_name", ExistingPeriodicWorkPolicy.KEEP, //KEEP or REPLACE
-            JokeWorker.getPeriodicWorkRequest() //your work instance.
-        )*/
+            //fetch categories
+            ServiceController.initCategories()
+            //fetch jokes
+            ServiceController.fetchJokesByCategory()
+        }
+
+        JokeWorker.lifecycleOwner = this
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "unique_worker_name", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, //KEEP or REPLACE
+            JokeWorker.getPeriodicWorkRequest()
+        )
 
         WorkManager.getInstance(this).enqueue(JokeWorker.getOneTimeRequest())
 
-        //super.onStartCommand(intent, flags, startId)
         return START_STICKY
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     override fun stopService(name: Intent?): Boolean {
+        Toast.makeText(this, "norris service stopped.", Toast.LENGTH_SHORT).show()
         return super.stopService(name)
     }
 
     override fun startService(service: Intent?): ComponentName? {
+        Toast.makeText(this, "norris service started.", Toast.LENGTH_SHORT).show()
         return super.startService(service)
     }
 

@@ -13,30 +13,31 @@ import com.root14.chucknorrisjokes.R
 
 class PopNotification {
     fun popNotification(notificationParams: NotificationParams) {
-        val intent = Intent(notificationParams.getContext(), MainActivity::class.java).apply {
+        val intent = Intent(notificationParams.context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         val pendingIntent: PendingIntent =
             PendingIntent.getActivity(
-                notificationParams.getContext(),
+                notificationParams.context,
                 0,
                 intent,
                 PendingIntent.FLAG_IMMUTABLE
             )
-
-        val builder = NotificationCompat.Builder(notificationParams.getContext(), "CHANNEL_ID")
+        //.setContentTitle(notificationParams.title)
+        val builder = NotificationCompat.Builder(notificationParams.context!!, "CHANNEL_ID")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(notificationParams.getTitle())
-            .setContentText(notificationParams.getContentText())
+
+            .setContentText(notificationParams.contentText)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setStyle(NotificationCompat.BigTextStyle())
             // Set the intent that fires when the user taps the notification.
             .setContentIntent(pendingIntent).setAutoCancel(true)
 
         if (ActivityCompat.checkSelfPermission(
-                notificationParams.getContext(), Manifest.permission.POST_NOTIFICATIONS
+                notificationParams.context!!, Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            with(NotificationManagerCompat.from(notificationParams.getContext())) {
+            with(NotificationManagerCompat.from(notificationParams.context!!)) {
                 // notificationId is a unique int for each notification that you must define.
                 notify(R.string.notificationId, builder.build())
             }

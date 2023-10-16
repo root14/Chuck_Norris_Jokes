@@ -38,13 +38,12 @@ class MainActivity : AppCompatActivity() {
         ServiceController.internetPermission.observe(this) { permission ->
             if (permission) {
                 val serviceIntent = Intent(this, NorrisBackgroundService::class.java)
-                startService(serviceIntent)
-                Toast.makeText(this, "norris service started.", Toast.LENGTH_SHORT).show()
+                startForegroundService(serviceIntent)
             }
-
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
@@ -65,14 +64,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun checkPermission() {
         if (ActivityCompat.checkSelfPermission(
-                baseContext, Manifest.permission.POST_NOTIFICATIONS
+                baseContext,
+                Manifest.permission.POST_NOTIFICATIONS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
+            ServiceController._internetPermission.postValue(false)
             ActivityCompat.requestPermissions(
                 this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 42
             )
+        } else {
+            ServiceController._internetPermission.postValue(true)
         }
     }
 }

@@ -3,19 +3,31 @@ package com.root14.chucknorrisjokes.service
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.root14.chucknorrisjokes.data.database.entity.JokeEntity
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.model.JokeModel
-import com.root14.chucknorrisjokes.utils.NetworkStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+
 class ServiceController {
 
-
     companion object {
+
+        lateinit var retrofitRepository: RetrofitRepository
+        lateinit var roomRepository: RoomRepository
+
+        fun injectRetrofitRepository(
+            retrofitRepository: RetrofitRepository,
+        ) {
+            this.retrofitRepository = retrofitRepository
+        }
+
+        fun injectRoomRepository(roomRepository: RoomRepository) {
+            this.roomRepository = roomRepository
+        }
+
         var _internetPermission = MutableLiveData<Boolean>()
         var internetPermission: LiveData<Boolean> = _internetPermission
 
@@ -24,7 +36,7 @@ class ServiceController {
          * @return joke count in room db
          * @exception at any problem return = -1
          */
-        fun getJokeCountInDb(roomRepository: RoomRepository): Int {
+        fun getJokeCountInDb(): Int {
             var count: Int = -1
             CoroutineScope(Dispatchers.IO).launch {
                 count = roomRepository.getJokeCount()
@@ -37,17 +49,27 @@ class ServiceController {
         val jokeRandomJokeFromApi: LiveData<JokeModel> = _jokeRandomJokeFromApi
 
         /**
-         * @param retrofitRepository
          * @return provide random joke from api
+         * @return jokeRandomJokeFromApi
          */
-        fun getRandomJokeFromApi(retrofitRepository: RetrofitRepository) {
+        fun getRandomJokeFromApi() {
             CoroutineScope(Dispatchers.IO).launch {
 
                 val data = retrofitRepository.getRandomJoke()
                 if (data.isSuccessful) {
                     _jokeRandomJokeFromApi.postValue(data.body())
                 } else {
-                    Log.e("random joke", "cannot provide random joke!")
+                    Log.e("random joke", "cannot provide random joke from api!")
+                    roomRepository.getJoke().let {
+                        val dummy = JokeModel(
+                            iconUrl = it?.iconUrl,
+                            id = it?.id,
+                            url = it?.url,
+                            value = it?.value,
+                        )
+                        _jokeRandomJokeFromApi.postValue(dummy)
+                    }
+                    Log.i("random joke", "we provide from db at this time.")
                 }
             }
         }
@@ -58,7 +80,7 @@ class ServiceController {
          */
         private val _jokeFromDb = MutableLiveData<JokeModel>()
         val jokeFromDb: LiveData<JokeModel> = _jokeFromDb
-        fun getJokeFromDb(roomRepository: RoomRepository) {
+        fun getJokeFromDb() {
             CoroutineScope(Dispatchers.IO).launch {
                 val data = roomRepository.getJoke()
                 if (data != null) {
@@ -86,7 +108,7 @@ class ServiceController {
          * @return this method try to automize process. be carefully when use it
          * @return try to provide firstly from room db if any problem occurs return random joke from api
          */
-        fun getJoke(retrofitRepository: RetrofitRepository, roomRepository: RoomRepository) {
+        fun getJoke() {
             CoroutineScope(Dispatchers.IO).launch {
                 val data = roomRepository.getJoke()
                 if (data != null) {
@@ -112,7 +134,6 @@ class ServiceController {
         private val _categorysCheck = MutableLiveData<Boolean>()
         val categorysCheck: LiveData<Boolean> = _categorysCheck
         fun initCategories(
-            retrofitRepository: RetrofitRepository, roomRepository: RoomRepository
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 val categories = retrofitRepository.getCategories() //get from api
@@ -140,7 +161,6 @@ class ServiceController {
          * @return save db jokes on every category on every called
          */
         fun fetchJokesByCategory(
-            retrofitRepository: RetrofitRepository, roomRepository: RoomRepository
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 val category = roomRepository.getCategories() //get category from db
