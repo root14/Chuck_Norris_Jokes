@@ -35,7 +35,6 @@ class JokeWorker(
         //internet connection & bad request & api exceptions -> provide from db
         //no internet connection -> provide from db
 
-
         if (NetworkStatusChecker().checkConnection(_context) == NetworkStatus.CONNECTED) {
             println("norris made a joke from api!")
 

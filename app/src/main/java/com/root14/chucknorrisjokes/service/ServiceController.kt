@@ -28,8 +28,11 @@ class ServiceController {
             this.roomRepository = roomRepository
         }
 
-        var _internetPermission = MutableLiveData<Boolean>()
-        var internetPermission: LiveData<Boolean> = _internetPermission
+        var _notificationPermission = MutableLiveData<Boolean>()
+        var notificationPermission: LiveData<Boolean> = _notificationPermission
+
+        var _batteryOptimization = MutableLiveData<Boolean>()
+        var batteryOptimization: LiveData<Boolean> = _notificationPermission
 
         /**
          * @param roomRepository

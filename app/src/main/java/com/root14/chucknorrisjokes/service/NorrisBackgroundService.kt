@@ -16,7 +16,10 @@ import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.utils.NetworkStatus
 import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.concurrent.timer
 
 
 @AndroidEntryPoint
@@ -63,7 +66,7 @@ class NorrisBackgroundService : LifecycleService() {
             JokeWorker.getPeriodicWorkRequest()
         )
 
-        WorkManager.getInstance(this).enqueue(JokeWorker.getOneTimeRequest())
+        //WorkManager.getInstance(this).enqueue(JokeWorker.getOneTimeRequest())
 
         return START_STICKY
     }

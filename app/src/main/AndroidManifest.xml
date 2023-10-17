@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -26,8 +27,7 @@
             android:name=".service.NorrisBackgroundService"
             android:enabled="true"
             android:exported="true"
-            android:stopWithTask="false"
-            />
+            android:stopWithTask="false" />
 
         <activity
             android:name=".MainActivity"
