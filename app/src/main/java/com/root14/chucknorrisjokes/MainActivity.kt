@@ -3,17 +3,21 @@ package com.root14.chucknorrisjokes
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.method.LinkMovementMethod
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
+import com.root14.chucknorrisjokes.databinding.ActivityMainBinding
 import com.root14.chucknorrisjokes.service.NorrisBackgroundService
 import com.root14.chucknorrisjokes.service.ServiceController
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,11 +37,26 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var retrofitRepository: RetrofitRepository
 
+
+    lateinit var binding: ActivityMainBinding
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+
+        /*window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
+        window.decorView.windowInsetsController?.setSystemBarsAppearance(
+            APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS
+        );*/
+
+
+        prepUi()
         checkPermission()
         ignoreBatteryOptimization()
 
@@ -62,13 +81,42 @@ class MainActivity : AppCompatActivity() {
                     delay(5000)
                     ignoreBatteryOptimization()
                 }
-            }else{
+            } else {
                 val serviceIntent = Intent(this, NorrisBackgroundService::class.java)
                 startService(serviceIntent)
             }
         }
+
+        binding.imageButtonGithub.setOnClickListener {
+            val browserIntent =
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rabaduptis"))
+            startActivity(browserIntent)
+        }
+
+        binding.imageButtonLinkedin.setOnClickListener {
+            val browserIntent = Intent(
+                Intent.ACTION_VIEW, Uri.parse("https://www.linkedin.com/in/basri-ilkay-gavaz/")
+            )
+            startActivity(browserIntent)
+        }
+
+
     }
 
+    private fun prepUi() {
+        binding.bntPopJoke.setBackgroundColor(Color.parseColor("#1E91EF"))
+        val bitmapGithub = BitmapFactory.decodeResource(
+            resources, R.mipmap.social_github
+        )
+        binding.imageButtonGithub.setImageBitmap(bitmapGithub)
+
+        val bitmapLinkedin = BitmapFactory.decodeResource(
+            resources, R.mipmap.social_linkedin
+        )
+        binding.imageButtonLinkedin.setImageBitmap(bitmapLinkedin)
+
+        binding.twContribute.movementMethod = LinkMovementMethod.getInstance()
+    }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onRequestPermissionsResult(

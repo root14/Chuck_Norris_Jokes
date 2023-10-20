@@ -62,7 +62,8 @@ class NorrisBackgroundService : LifecycleService() {
         JokeWorker.lifecycleOwner = this
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "unique_worker_name", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, //KEEP or REPLACE
+            "unique_worker_name",
+            ExistingPeriodicWorkPolicy.KEEP,
             JokeWorker.getPeriodicWorkRequest()
         )
 

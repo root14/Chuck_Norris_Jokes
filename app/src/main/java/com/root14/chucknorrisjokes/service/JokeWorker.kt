@@ -82,7 +82,7 @@ class JokeWorker(
                 .build()
 
             return PeriodicWorkRequestBuilder<JokeWorker>(
-                16, //every 15 Minutes, this worker will run.It should be Greater then or equal to 15 minutes.
+                15, //every 15 Minutes, this worker will run.It should be Greater then or equal to 15 minutes.
                 TimeUnit.MINUTES
             ).setConstraints(constraints).build()
         }
