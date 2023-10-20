@@ -22,6 +22,7 @@ import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.databinding.ActivityMainBinding
 import com.root14.chucknorrisjokes.service.NorrisBackgroundService
 import com.root14.chucknorrisjokes.service.ServiceController
+import com.root14.chucknorrisjokes.utils.AdHelper
 import com.root14.chucknorrisjokes.utils.NetworkStatus
 import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
 import com.root14.chucknorrisjokes.utils.NotificationParams
@@ -109,6 +110,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         /**
          * handle get joke button
          */
@@ -116,11 +118,13 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.IO) {
                 if (NetworkStatusChecker().checkConnection(this@MainActivity) == NetworkStatus.CONNECTED) {
                     ServiceController.getRandomJokeFromApi()
-                    changeJokeButtonAvailability(false)
+                    //changeJokeButtonAvailability(false)
+                    lifecycleScope.launch(Dispatchers.Main) { AdHelper.awardedAd(this@MainActivity) }
+
+
                 } else if (NetworkStatusChecker().checkConnection(this@MainActivity) == NetworkStatus.NOT_CONNECTED) {
                     if (roomRepository.getJokeCount() >= 0) {
                         ServiceController.getJokeFromDb()
-                        changeJokeButtonAvailability(false)
                     } else {
                         Toast.makeText(
                             this@MainActivity, "cannot provide joke now.", Toast.LENGTH_SHORT
