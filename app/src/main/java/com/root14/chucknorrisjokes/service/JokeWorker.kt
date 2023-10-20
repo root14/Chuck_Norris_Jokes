@@ -31,40 +31,44 @@ class JokeWorker(
     private val _context: Context = context
 
     override suspend fun doWork(): Result {
-        //internet connection -> provide random joke from api && check db for joke count and fill it!
-        //internet connection & bad request & api exceptions -> provide from db
-        //no internet connection -> provide from db
+        /**
+         * -> internet connection -> provide random joke from api && check db for joke count and fill it!
+         * -> internet connection & bad request & api exceptions -> provide from db
+         * -> no internet connection -> provide from db
+         */
 
         if (NetworkStatusChecker().checkConnection(_context) == NetworkStatus.CONNECTED) {
             println("norris made a joke from api!")
 
-            ServiceController.getRandomJokeFromApi()
-            lifecycleOwner.lifecycleScope.launch {
-                with(Dispatchers.IO) {
-                    ServiceController.jokeRandomJokeFromApi.observe(lifecycleOwner) {
-                        val notificationParams =
-                            NotificationParams.Builder().setContentText(it.value.toString())
-                                .setTitle(it.url.toString()).setContext(_context).build()
 
-                        PopNotification().popNotification(notificationParams)
-                    }
+            /**
+             * If norris is started without internet and the internet is connected while the service is running,
+             * it fills the database.
+             */
+            if (ServiceController.initialized.value == false) {
+                lifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    ServiceController.fetchJokesByCategory()
                 }
+            }
+
+            ServiceController.getRandomJokeFromApi()
+            ServiceController.jokeRandomJokeFromApi.observe(lifecycleOwner) {
+                val notificationParams =
+                    NotificationParams.Builder().setContentText(it.value.toString())
+                        .setTitle(it.url.toString()).setContext(_context).build()
+
+                PopNotification().popNotification(notificationParams)
             }
             return Result.success()
 
         } else if (NetworkStatusChecker().checkConnection(_context) == NetworkStatus.NOT_CONNECTED) {
-
             ServiceController.getJokeFromDb()
-            lifecycleOwner.lifecycleScope.launch {
-                with(Dispatchers.IO) {
-                    ServiceController.jokeFromDb.observe(lifecycleOwner) {
-                        val notificationParams =
-                            NotificationParams.Builder().setContentText(it.value.toString())
-                                .setTitle(it.url.toString()).setContext(_context).build()
+            ServiceController.jokeFromDb.observe(lifecycleOwner) {
+                val notificationParams =
+                    NotificationParams.Builder().setContentText(it.value.toString())
+                        .setTitle(it.url.toString()).setContext(_context).build()
 
-                        PopNotification().popNotification(notificationParams)
-                    }
-                }
+                PopNotification().popNotification(notificationParams)
             }
 
             return Result.success()
@@ -78,12 +82,12 @@ class JokeWorker(
         fun getPeriodicWorkRequest(): PeriodicWorkRequest {
 
             val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED) //worker will run,Network is Connected.
+                //.setRequiredNetworkType(NetworkType.CONNECTED) //worker will run when Network is Connected.
                 .build()
 
             return PeriodicWorkRequestBuilder<JokeWorker>(
-                15, //every 15 Minutes, this worker will run.It should be Greater then or equal to 15 minutes.
-                TimeUnit.MINUTES
+                3, //every 15 Minutes, this worker will run.It should be Greater then or equal to 15 minutes.
+                TimeUnit.HOURS
             ).setConstraints(constraints).build()
         }
 

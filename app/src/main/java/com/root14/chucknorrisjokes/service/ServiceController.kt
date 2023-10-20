@@ -28,9 +28,15 @@ class ServiceController {
             this.roomRepository = roomRepository
         }
 
+        // notification permission
         var _notificationPermission = MutableLiveData<Boolean>()
         var notificationPermission: LiveData<Boolean> = _notificationPermission
 
+        // network availability permission
+        var _networkAvailability = MutableLiveData<Boolean>()
+        var networkAvailability: LiveData<Boolean> = _networkAvailability
+
+        // battery optimization permission
         var _batteryOptimization = MutableLiveData<Boolean>()
         var batteryOptimization: LiveData<Boolean> = _notificationPermission
 
@@ -155,8 +161,8 @@ class ServiceController {
             }
         }
 
-        private val _jokeCheck = MutableLiveData<Boolean>()
-        val jokeCheck: LiveData<Boolean> = _jokeCheck
+        private val _initialized = MutableLiveData<Boolean>()
+        val initialized: LiveData<Boolean> = _initialized
 
         /**
          * @param retrofitRepository for api calls
@@ -177,7 +183,7 @@ class ServiceController {
                                 data.body()?.let { roomRepository.saveJoke(it) }//save to db
                             }
                         }
-                        _jokeCheck.postValue(true)
+                        _initialized.postValue(true)
                     } catch (e: Exception) {
                         //TODO: TEST ME
                         //if any problem with endpoint
@@ -186,11 +192,11 @@ class ServiceController {
                             val randomJoke = retrofitRepository.getRandomJoke()
                             if (randomJoke.isSuccessful) {
                                 randomJoke.body()?.let { roomRepository.saveJoke(it) }
-                                _jokeCheck.postValue(true)
+                                _initialized.postValue(true)
                             } else {
                                 //TODO:error handle
                                 e.message?.let { Log.e("getJokesByCategory-exception", it) }
-                                _jokeCheck.postValue(false)//err
+                                _initialized.postValue(false)//err
                             }
                             categoryCount--
                         }

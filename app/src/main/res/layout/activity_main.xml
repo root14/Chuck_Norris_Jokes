@@ -46,7 +46,7 @@
 
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/bnt_pop_joke"
+        android:id="@+id/btn_pop_joke"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -75,6 +75,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="@+id/linearLayout" />
+
+    <TextView
+        android:id="@+id/tw_remaining_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/instant_jokes_by_watching_ads"
+        android:textColor="#80000000"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/btn_pop_joke"
+        app:layout_constraintStart_toStartOf="@+id/btn_pop_joke"
+        app:layout_constraintTop_toBottomOf="@+id/btn_pop_joke" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

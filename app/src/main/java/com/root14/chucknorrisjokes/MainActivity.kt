@@ -1,6 +1,7 @@
 package com.root14.chucknorrisjokes
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
@@ -19,7 +20,6 @@ import androidx.lifecycle.lifecycleScope
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.databinding.ActivityMainBinding
-import com.root14.chucknorrisjokes.service.JokeWorker
 import com.root14.chucknorrisjokes.service.NorrisBackgroundService
 import com.root14.chucknorrisjokes.service.ServiceController
 import com.root14.chucknorrisjokes.utils.NetworkStatus
@@ -28,10 +28,13 @@ import com.root14.chucknorrisjokes.utils.NotificationParams
 import com.root14.chucknorrisjokes.utils.PopNotification
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.concurrent.timer
+import kotlin.concurrent.timerTask
 
 
 @AndroidEntryPoint
@@ -44,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var retrofitRepository: RetrofitRepository
 
 
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,26 +55,39 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        /*window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )
-        window.decorView.windowInsetsController?.setSystemBarsAppearance(
-            APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS
-        );*/
-
-
+        /**
+         * required steps for startup
+         */
         prepUi()
         checkPermission()
         ignoreBatteryOptimization()
 
+        /**
+         * handle permissions
+         */
         ServiceController.notificationPermission.observe(this) { permission ->
             if (permission) {
                 if (isIgnoringBatteryOptimizations()) {
-                    ServiceController._batteryOptimization.postValue(true)
-                    val serviceIntent = Intent(this, NorrisBackgroundService::class.java)
-                    startService(serviceIntent)
+                    //#454545
+                    when (NetworkStatusChecker().checkConnection(this)) {
+                        NetworkStatus.CONNECTED -> {
+                            ServiceController._batteryOptimization.postValue(true)
+                            changeJokeButtonAvailability(true)
+                            val serviceIntent = Intent(this, NorrisBackgroundService::class.java)
+                            //start services
+                            startService(serviceIntent)
+                        }
+
+                        NetworkStatus.NOT_CONNECTED -> {
+                            changeJokeButtonAvailability(false)
+                            Toast.makeText(
+                                this,
+                                "Unable to access the internet. Restart the application once access is granted.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
                 } else {
                     Toast.makeText(
                         this, "please give battery optimization permission.", Toast.LENGTH_SHORT
@@ -93,54 +109,73 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.bntPopJoke.setOnClickListener {
-            if (NetworkStatusChecker().checkConnection(this) == NetworkStatus.NOT_CONNECTED) {
-                ServiceController.getRandomJokeFromApi()
-
-                ServiceController.jokeRandomJokeFromApi.observe(this) {
-                    val notificationParams =
-                        NotificationParams.Builder().setContentText(it.value.toString())
-                            .setTitle(it.url.toString()).setContext(this).build()
-
-                    PopNotification().popNotification(notificationParams)
-                }
-            } else {
-                ServiceController.getJokeFromDb()
-                JokeWorker.lifecycleOwner.lifecycleScope.launch {
+        /**
+         * handle get joke button
+         */
+        binding.btnPopJoke.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (NetworkStatusChecker().checkConnection(this@MainActivity) == NetworkStatus.CONNECTED) {
+                    ServiceController.getRandomJokeFromApi()
+                    changeJokeButtonAvailability(false)
+                } else if (NetworkStatusChecker().checkConnection(this@MainActivity) == NetworkStatus.NOT_CONNECTED) {
                     if (roomRepository.getJokeCount() >= 0) {
-                        with(Dispatchers.IO) {
-                            ServiceController.jokeFromDb.observe(this@MainActivity) {
-                                val notificationParams =
-                                    NotificationParams.Builder().setContentText(it.value.toString())
-                                        .setTitle(it.url.toString()).setContext(this@MainActivity)
-                                        .build()
-
-                                PopNotification().popNotification(notificationParams)
-                            }
-                        }
+                        ServiceController.getJokeFromDb()
+                        changeJokeButtonAvailability(false)
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity, "cannot provide joke now.", Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
-        }
 
-        binding.imageButtonGithub.setOnClickListener {
-            val browserIntent =
-                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rabaduptis"))
-            startActivity(browserIntent)
-        }
+            ServiceController.jokeRandomJokeFromApi.observe(this@MainActivity) {
+                val notificationParams =
+                    NotificationParams.Builder().setContentText(it.value.toString())
+                        .setTitle(it.url.toString()).setContext(this@MainActivity).build()
 
-        binding.imageButtonLinkedin.setOnClickListener {
-            val browserIntent = Intent(
-                Intent.ACTION_VIEW, Uri.parse("https://www.linkedin.com/in/basri-ilkay-gavaz/")
+                PopNotification().popNotification(notificationParams)
+            }
+
+            ServiceController.jokeFromDb.observe(this@MainActivity) {
+                val notificationParams =
+                    NotificationParams.Builder().setContentText(it.value.toString())
+                        .setTitle(it.url.toString()).setContext(this@MainActivity).build()
+                PopNotification().popNotification(notificationParams)
+            }
+
+
+            /**
+             * handle social buttons
+             */
+            binding.imageButtonGithub.setOnClickListener {
+                val browserIntent =
+                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rabaduptis"))
+                startActivity(browserIntent)
+            }
+
+            binding.imageButtonLinkedin.setOnClickListener {
+                val browserIntent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.linkedin.com/in/basri-ilkay-gavaz/")
+                )
+                startActivity(browserIntent)
+            }
+        }
+    }
+
+    private fun changeJokeButtonAvailability(boolean: Boolean) {
+        ServiceController._networkAvailability.postValue(boolean)
+        binding.btnPopJoke.isClickable = boolean
+
+        binding.btnPopJoke.setBackgroundColor(
+            if (boolean) Color.parseColor("#1E91EF") else Color.parseColor(
+                "#454545"
             )
-            startActivity(browserIntent)
-        }
-
-
+        )
     }
 
     private fun prepUi() {
-        binding.bntPopJoke.setBackgroundColor(Color.parseColor("#1E91EF"))
         val bitmapGithub = BitmapFactory.decodeResource(
             resources, R.mipmap.social_github
         )
@@ -180,6 +215,7 @@ class MainActivity : AppCompatActivity() {
         return pm.isIgnoringBatteryOptimizations(packageName)
     }
 
+    @SuppressLint("BatteryLife")
     private fun ignoreBatteryOptimization() {
         val intent = Intent()
         val packageName = packageName
