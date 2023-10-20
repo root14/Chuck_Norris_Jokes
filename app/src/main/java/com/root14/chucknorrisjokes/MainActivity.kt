@@ -15,11 +15,17 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.databinding.ActivityMainBinding
+import com.root14.chucknorrisjokes.service.JokeWorker
 import com.root14.chucknorrisjokes.service.NorrisBackgroundService
 import com.root14.chucknorrisjokes.service.ServiceController
+import com.root14.chucknorrisjokes.utils.NetworkStatus
+import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
+import com.root14.chucknorrisjokes.utils.NotificationParams
+import com.root14.chucknorrisjokes.utils.PopNotification
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,6 +90,36 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val serviceIntent = Intent(this, NorrisBackgroundService::class.java)
                 startService(serviceIntent)
+            }
+        }
+
+        binding.bntPopJoke.setOnClickListener {
+            if (NetworkStatusChecker().checkConnection(this) == NetworkStatus.NOT_CONNECTED) {
+                ServiceController.getRandomJokeFromApi()
+
+                ServiceController.jokeRandomJokeFromApi.observe(this) {
+                    val notificationParams =
+                        NotificationParams.Builder().setContentText(it.value.toString())
+                            .setTitle(it.url.toString()).setContext(this).build()
+
+                    PopNotification().popNotification(notificationParams)
+                }
+            } else {
+                ServiceController.getJokeFromDb()
+                JokeWorker.lifecycleOwner.lifecycleScope.launch {
+                    if (roomRepository.getJokeCount() >= 0) {
+                        with(Dispatchers.IO) {
+                            ServiceController.jokeFromDb.observe(this@MainActivity) {
+                                val notificationParams =
+                                    NotificationParams.Builder().setContentText(it.value.toString())
+                                        .setTitle(it.url.toString()).setContext(this@MainActivity)
+                                        .build()
+
+                                PopNotification().popNotification(notificationParams)
+                            }
+                        }
+                    }
+                }
             }
         }
 
