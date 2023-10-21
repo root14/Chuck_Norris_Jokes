@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Chuck Norris Jokes</string>
     <string name="this_app_sends_you_chuck_norris_jokes_when_you_are_most_bored">This app sends you Chuck Norris jokes when you are most bored.</string>
+    <string name="channel_name">Joke Notification</string>
+    <string name="channel_description">channel_description</string>
+    <string name="notificationId">CHANNEL_ID</string>
     <string name="or_get_a_joke">or get a joke!</string>
+    <string name="thanks">Thanks to <a href="https://www.freepik.com/icon/beard_3947971#fromView=search&amp;term=beard+man&amp;page=3&amp;position=54&amp;track=ais">Good Ware</a> and <a href="https://www.freepik.com/icon/github_3488408#fromView=search&amp;term=github&amp;page=1&amp;position=70&amp;track=ais">IconsBox</a> for contributing to the project.</string>
+    <string name="instant_jokes_by_watching_ads">instant jokes by watching ads!</string>
 </resources>

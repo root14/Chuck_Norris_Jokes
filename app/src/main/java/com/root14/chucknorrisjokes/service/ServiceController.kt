@@ -173,7 +173,7 @@ class ServiceController {
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 val category = roomRepository.getCategories() //get category from db
-                if (category.isNotEmpty()) {
+                if (category.isNotEmpty() and (roomRepository.getJokeCount() <= 48)) {
                     try {
                         category.forEach { _category ->
                             val data =

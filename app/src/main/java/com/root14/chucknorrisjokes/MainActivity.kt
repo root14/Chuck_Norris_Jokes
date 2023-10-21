@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                             changeJokeButtonAvailability(true)
                             val serviceIntent = Intent(this, NorrisBackgroundService::class.java)
                             //start services
-                            startService(serviceIntent)
+                            // startService(serviceIntent)
                         }
 
                         NetworkStatus.NOT_CONNECTED -> {
@@ -118,10 +118,7 @@ class MainActivity : AppCompatActivity() {
                     ServiceController.getRandomJokeFromApi()
                     lifecycleScope.launch(Dispatchers.Main) {
                         AdHelper.awardedAd(this@MainActivity).let { ad ->
-                            ad?.show(this@MainActivity, OnUserEarnedRewardListener { rewardItem ->
-                                // Handle the reward.
-                                val rewardAmount = rewardItem.amount
-                                val rewardType = rewardItem.type
+                            ad?.show(this@MainActivity, OnUserEarnedRewardListener {
                                 Log.d("norris ad", "User earned the reward.")
                             })
                         } ?: run {
@@ -140,39 +137,39 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
 
-            ServiceController.jokeRandomJokeFromApi.observe(this@MainActivity) {
-                val notificationParams =
-                    NotificationParams.Builder().setContentText(it.value.toString())
-                        .setTitle(it.url.toString()).setContext(this@MainActivity).build()
+        ServiceController.jokeRandomJokeFromApi.observe(this@MainActivity) {
+            val notificationParams =
+                NotificationParams.Builder().setContentText(it.value.toString())
+                    .setTitle(it.url.toString()).setContext(this@MainActivity).build()
 
-                PopNotification().popNotification(notificationParams)
-            }
+            PopNotification().popNotification(notificationParams)
+        }
 
-            ServiceController.jokeFromDb.observe(this@MainActivity) {
-                val notificationParams =
-                    NotificationParams.Builder().setContentText(it.value.toString())
-                        .setTitle(it.url.toString()).setContext(this@MainActivity).build()
-                PopNotification().popNotification(notificationParams)
-            }
+        ServiceController.jokeFromDb.observe(this@MainActivity) {
+            val notificationParams =
+                NotificationParams.Builder().setContentText(it.value.toString())
+                    .setTitle(it.url.toString()).setContext(this@MainActivity).build()
+            PopNotification().popNotification(notificationParams)
+        }
 
 
-            /**
-             * handle social buttons
-             */
-            binding.imageButtonGithub.setOnClickListener {
-                val browserIntent =
-                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rabaduptis"))
-                startActivity(browserIntent)
-            }
+        /**
+         * handle social buttons
+         */
+        binding.imageButtonGithub.setOnClickListener {
+            val browserIntent =
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rabaduptis"))
+            startActivity(browserIntent)
+        }
 
-            binding.imageButtonLinkedin.setOnClickListener {
-                val browserIntent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://www.linkedin.com/in/basri-ilkay-gavaz/")
-                )
-                startActivity(browserIntent)
-            }
+        binding.imageButtonLinkedin.setOnClickListener {
+            val browserIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.linkedin.com/in/basri-ilkay-gavaz/")
+            )
+            startActivity(browserIntent)
         }
     }
 

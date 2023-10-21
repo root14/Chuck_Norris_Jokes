@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.root14.chucknorrisjokes.data.database.entity.CategoryEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoryDao {
@@ -20,4 +19,7 @@ interface CategoryDao {
 
     @Delete
     suspend fun delete(category: CategoryEntity)
+
+    @Query("DELETE FROM CategoryEntity")
+    fun deleteAll()
 }

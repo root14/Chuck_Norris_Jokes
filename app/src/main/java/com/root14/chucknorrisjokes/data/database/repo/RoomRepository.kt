@@ -22,10 +22,13 @@ class RoomRepository(private val categoryDao: CategoryDao, private val jokeDao: 
             dummyList.add(it.categoryName)
         }
 
-        if (!category.equals(dummyList))
+        if (category != dummyList){
+            categoryDao.deleteAll()
             category.forEach {
                 categoryDao.insert(CategoryEntity(categoryName = it))
             }
+        }
+
     }
 
     suspend fun saveJoke(jokeModel: JokeModel) {
