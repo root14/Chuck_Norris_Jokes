@@ -12,11 +12,13 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.method.LinkMovementMethod
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.ads.OnUserEarnedRewardListener
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
 import com.root14.chucknorrisjokes.data.network.RetrofitRepository
 import com.root14.chucknorrisjokes.databinding.ActivityMainBinding
@@ -29,13 +31,10 @@ import com.root14.chucknorrisjokes.utils.NotificationParams
 import com.root14.chucknorrisjokes.utils.PopNotification
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.concurrent.timer
-import kotlin.concurrent.timerTask
 
 
 @AndroidEntryPoint
@@ -117,8 +116,18 @@ class MainActivity : AppCompatActivity() {
             lifecycleScope.launch(Dispatchers.IO) {
                 if (NetworkStatusChecker().checkConnection(this@MainActivity) == NetworkStatus.CONNECTED) {
                     ServiceController.getRandomJokeFromApi()
-                    //changeJokeButtonAvailability(false)
-                    lifecycleScope.launch(Dispatchers.Main) { AdHelper.awardedAd(this@MainActivity) }
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        AdHelper.awardedAd(this@MainActivity).let { ad ->
+                            ad?.show(this@MainActivity, OnUserEarnedRewardListener { rewardItem ->
+                                // Handle the reward.
+                                val rewardAmount = rewardItem.amount
+                                val rewardType = rewardItem.type
+                                Log.d("norris ad", "User earned the reward.")
+                            })
+                        } ?: run {
+                            Log.d("norris ad", "The rewarded ad wasn't ready yet.")
+                        }
+                    }
 
 
                 } else if (NetworkStatusChecker().checkConnection(this@MainActivity) == NetworkStatus.NOT_CONNECTED) {

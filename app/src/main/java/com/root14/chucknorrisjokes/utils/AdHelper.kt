@@ -10,9 +10,9 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 class AdHelper {
 
     companion object {
-        fun awardedAd(context: Context): Boolean {
+        private var rewardedAd: RewardedAd? = null
+        fun awardedAd(context: Context): RewardedAd? {
             val adRequest = AdRequest.Builder().build()
-            var result = false
             RewardedAd.load(
                 context,
                 "ca-app-pub-3760820713270793/6226953885",
@@ -20,16 +20,15 @@ class AdHelper {
                 object : RewardedAdLoadCallback() {
                     override fun onAdFailedToLoad(adError: LoadAdError) {
                         Log.d("norris award ad", adError.toString())
-                        result = false
-
+                        rewardedAd = null
                     }
 
                     override fun onAdLoaded(ad: RewardedAd) {
                         Log.d("norris award ad", "Ad was loaded.")
-                        result = true
+                        rewardedAd = ad
                     }
                 })
-            return result
+            return rewardedAd
         }
     }
 }
