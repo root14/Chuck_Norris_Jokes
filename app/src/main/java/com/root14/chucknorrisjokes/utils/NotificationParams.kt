@@ -7,7 +7,6 @@ import java.util.Objects
 class NotificationParams(
     var title: String?, var contentText: String?, var smallIcon: Int?, var context: Context?
 ) {
-
     class Builder {
         private var builderTitle: String? = null
         private var builderContentText: String? = null

@@ -1,6 +1,8 @@
 package com.root14.chucknorrisjokes.service
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -19,14 +21,12 @@ import com.root14.chucknorrisjokes.utils.NotificationParams
 import com.root14.chucknorrisjokes.utils.PopNotification
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 
-class JokeWorker(
-    context: Context,
-    parameters: WorkerParameters,
-
-    ) : CoroutineWorker(context, parameters) {
+class JokeWorker(context: Context, parameters: WorkerParameters) :
+    CoroutineWorker(context, parameters) {
 
     private val _context: Context = context
 
@@ -52,12 +52,14 @@ class JokeWorker(
             }
 
             ServiceController.getRandomJokeFromApi()
-            ServiceController.jokeRandomJokeFromApi.observe(lifecycleOwner) {
-                val notificationParams =
-                    NotificationParams.Builder().setContentText(it.value.toString())
-                        .setTitle(it.url.toString()).setContext(_context).build()
+            withContext(Dispatchers.Main) {
+                ServiceController.jokeRandomJokeFromApi.observe(lifecycleOwner) {
+                    val notificationParams =
+                        NotificationParams.Builder().setContentText(it.value.toString())
+                            .setTitle(it.url.toString()).setContext(_context).build()
 
-                PopNotification().popNotification(notificationParams)
+                    PopNotification().popNotification(notificationParams)
+                }
             }
             return Result.success()
 
@@ -86,8 +88,8 @@ class JokeWorker(
                 .build()
 
             return PeriodicWorkRequestBuilder<JokeWorker>(
-                3, //every 15 Minutes, this worker will run.It should be Greater then or equal to 15 minutes.
-                TimeUnit.HOURS
+                15, //every 15 Minutes, this worker will run.It should be Greater then or equal to 15 minutes.
+                TimeUnit.MINUTES
             ).setConstraints(constraints).build()
         }
 

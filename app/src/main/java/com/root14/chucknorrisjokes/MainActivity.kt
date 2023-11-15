@@ -120,6 +120,15 @@ class MainActivity : AppCompatActivity() {
                         AdHelper.awardedAd(this@MainActivity).let { ad ->
                             ad?.show(this@MainActivity, OnUserEarnedRewardListener {
                                 Log.d("norris ad", "User earned the reward.")
+
+                                ServiceController.jokeRandomJokeFromApi.observe(this@MainActivity) {
+                                    val notificationParams =
+                                        NotificationParams.Builder().setContentText(it.value.toString())
+                                            .setTitle(it.url.toString()).setContext(this@MainActivity).build()
+
+                                    PopNotification().popNotification(notificationParams)
+                                }
+
                             })
                         } ?: run {
                             Log.d("norris ad", "The rewarded ad wasn't ready yet.")
@@ -137,14 +146,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
-
-        ServiceController.jokeRandomJokeFromApi.observe(this@MainActivity) {
-            val notificationParams =
-                NotificationParams.Builder().setContentText(it.value.toString())
-                    .setTitle(it.url.toString()).setContext(this@MainActivity).build()
-
-            PopNotification().popNotification(notificationParams)
         }
 
         ServiceController.jokeFromDb.observe(this@MainActivity) {
