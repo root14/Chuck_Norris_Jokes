@@ -115,21 +115,26 @@ class MainActivity : AppCompatActivity() {
         binding.btnPopJoke.setOnClickListener {
             lifecycleScope.launch(Dispatchers.IO) {
                 if (NetworkStatusChecker().checkConnection(this@MainActivity) == NetworkStatus.CONNECTED) {
+
                     ServiceController.getRandomJokeFromApi()
+
                     lifecycleScope.launch(Dispatchers.Main) {
+
                         AdHelper.awardedAd(this@MainActivity).let { ad ->
-                            ad?.show(this@MainActivity, OnUserEarnedRewardListener {
+                            ad?.show(this@MainActivity) {
                                 Log.d("norris ad", "User earned the reward.")
 
                                 ServiceController.jokeRandomJokeFromApi.observe(this@MainActivity) {
                                     val notificationParams =
-                                        NotificationParams.Builder().setContentText(it.value.toString())
-                                            .setTitle(it.url.toString()).setContext(this@MainActivity).build()
+                                        NotificationParams.Builder()
+                                            .setContentText(it.value.toString())
+                                            .setTitle(it.url.toString())
+                                            .setContext(this@MainActivity).build()
 
                                     PopNotification().popNotification(notificationParams)
                                 }
 
-                            })
+                            }
                         } ?: run {
                             Log.d("norris ad", "The rewarded ad wasn't ready yet.")
                         }
@@ -161,7 +166,7 @@ class MainActivity : AppCompatActivity() {
          */
         binding.imageButtonGithub.setOnClickListener {
             val browserIntent =
-                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rabaduptis"))
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/root14"))
             startActivity(browserIntent)
         }
 
