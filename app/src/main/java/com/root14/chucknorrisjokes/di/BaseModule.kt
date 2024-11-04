@@ -1,19 +1,16 @@
 package com.root14.chucknorrisjokes.di
 
 import android.app.Application
-import android.content.Context
 import androidx.room.Room
 import com.root14.chucknorrisjokes.data.database.AppDatabase
 import com.root14.chucknorrisjokes.data.database.dao.CategoryDao
 import com.root14.chucknorrisjokes.data.database.dao.JokeDao
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
-import com.root14.chucknorrisjokes.data.network.RetrofitRepository
-import com.root14.chucknorrisjokes.data.network.RetrofitService
-import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
+import com.root14.chucknorrisjokes.data.network.repo.RetrofitRepository
+import com.root14.chucknorrisjokes.data.network.service.RetrofitService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

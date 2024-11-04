@@ -20,10 +20,10 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.ads.OnUserEarnedRewardListener
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
-import com.root14.chucknorrisjokes.data.network.RetrofitRepository
+import com.root14.chucknorrisjokes.data.network.repo.RetrofitRepository
 import com.root14.chucknorrisjokes.databinding.ActivityMainBinding
-import com.root14.chucknorrisjokes.service.NorrisBackgroundService
-import com.root14.chucknorrisjokes.service.ServiceController
+import com.root14.chucknorrisjokes.data.background.NorrisBackgroundService
+import com.root14.chucknorrisjokes.controller.ServiceController
 import com.root14.chucknorrisjokes.utils.AdHelper
 import com.root14.chucknorrisjokes.utils.NetworkStatus
 import com.root14.chucknorrisjokes.utils.NetworkStatusChecker

@@ -1,8 +1,9 @@
-package com.root14.chucknorrisjokes.service
+package com.root14.chucknorrisjokes
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.root14.chucknorrisjokes.data.background.NorrisBackgroundService
 
 class NorrisBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {

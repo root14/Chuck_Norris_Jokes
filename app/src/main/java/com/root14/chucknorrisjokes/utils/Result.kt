@@ -1,4 +1,4 @@
-package com.root14.chucknorrisjokes.data
+package com.root14.chucknorrisjokes.utils
 
 /**
  * A generic class that holds a value with its loading status.

@@ -1,6 +1,5 @@
-package com.root14.chucknorrisjokes.data.network
+package com.root14.chucknorrisjokes.data.network.service
 
-import com.root14.chucknorrisjokes.data.Result
 import com.root14.chucknorrisjokes.model.JokeModel
 import retrofit2.Response
 import retrofit2.http.GET

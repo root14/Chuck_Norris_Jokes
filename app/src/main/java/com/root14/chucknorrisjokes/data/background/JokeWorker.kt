@@ -1,20 +1,16 @@
-package com.root14.chucknorrisjokes.service
+package com.root14.chucknorrisjokes.data.background
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
-import com.root14.chucknorrisjokes.R
+import com.root14.chucknorrisjokes.controller.ServiceController
 import com.root14.chucknorrisjokes.utils.NetworkStatus
 import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
 import com.root14.chucknorrisjokes.utils.NotificationParams

@@ -1,4 +1,4 @@
-package com.root14.chucknorrisjokes.service
+package com.root14.chucknorrisjokes.data.background
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,14 +12,12 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
 import com.root14.chucknorrisjokes.R
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
-import com.root14.chucknorrisjokes.data.network.RetrofitRepository
+import com.root14.chucknorrisjokes.data.network.repo.RetrofitRepository
+import com.root14.chucknorrisjokes.controller.ServiceController
 import com.root14.chucknorrisjokes.utils.NetworkStatus
 import com.root14.chucknorrisjokes.utils.NetworkStatusChecker
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.concurrent.timer
 
 
 @AndroidEntryPoint

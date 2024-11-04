@@ -1,4 +1,6 @@
-package com.root14.chucknorrisjokes.data.network
+package com.root14.chucknorrisjokes.data.network.repo
+
+import com.root14.chucknorrisjokes.data.network.service.RetrofitService
 
 class RetrofitRepository(private val retrofitService: RetrofitService) {
     suspend fun getRandomJoke() = retrofitService.getRandomJoke()

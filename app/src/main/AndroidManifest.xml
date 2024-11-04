@@ -27,13 +27,13 @@
             android:value="ca-app-pub-3760820713270793~6507576368"/>
 
         <service
-            android:name=".service.NorrisBackgroundService"
+            android:name=".data.background.NorrisBackgroundService"
             android:enabled="true"
             android:exported="true"
             android:stopWithTask="false" />
 
         <receiver
-            android:name=".service.NorrisBroadcastReceiver"
+            android:name=".NorrisBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

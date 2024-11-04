@@ -1,10 +1,10 @@
-package com.root14.chucknorrisjokes.service
+package com.root14.chucknorrisjokes.controller
 
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.root14.chucknorrisjokes.data.database.repo.RoomRepository
-import com.root14.chucknorrisjokes.data.network.RetrofitRepository
+import com.root14.chucknorrisjokes.data.network.repo.RetrofitRepository
 import com.root14.chucknorrisjokes.model.JokeModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,11 +21,11 @@ class ServiceController {
         fun injectRetrofitRepository(
             retrofitRepository: RetrofitRepository,
         ) {
-            this.retrofitRepository = retrofitRepository
+            Companion.retrofitRepository = retrofitRepository
         }
 
         fun injectRoomRepository(roomRepository: RoomRepository) {
-            this.roomRepository = roomRepository
+            Companion.roomRepository = roomRepository
         }
 
         // notification permission
